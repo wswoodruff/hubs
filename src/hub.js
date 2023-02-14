@@ -213,6 +213,12 @@ const mediaSearchStore = window.APP.mediaSearchStore;
 const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
 const NOISY_OCCUPANT_COUNT = 30; // Above this # of occupants, we stop posting join/leaves/renames
 
+// Hubs plugins
+import { registerDefaultPlugins, forEachPlugin } from "./plugins/index";
+
+// Register prod and maybe dev plugins depending on env
+registerDefaultPlugins(store);
+
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
@@ -368,6 +374,8 @@ function mountUI(props = {}) {
     </WrappedIntlProvider>,
     document.getElementById("ui-root")
   );
+  // Run plugins remount for every render. For effects we can use hooks
+  forEachPlugin(plugin => plugin.onRemount && plugin.onRemount({ scene }));
 }
 
 export function remountUI(props) {
@@ -705,6 +713,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const canvas = document.querySelector(".a-canvas");
   canvas.classList.add("a-hidden");
 
+  forEachPlugin(plugin => plugin.onCanvas && plugin.onCanvas({ canvas }));
+
   if (platformUnsupported()) {
     return;
   }
@@ -745,6 +755,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems["hubs-systems"].physicsSystem;
     physicsSystem.setDebug(isDebug || physicsSystem.debug);
+    forEachPlugin(plugin => plugin.onSceneLoaded && plugin.onSceneLoaded({ scene, physicsSystem }));
   };
   if (scene.hasLoaded) {
     onSceneLoaded();

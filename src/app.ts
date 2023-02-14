@@ -28,6 +28,7 @@ import { mainTick } from "./systems/hubs-systems";
 import { waitForPreloads } from "./utils/preload";
 import SceneEntryManager from "./scene-entry-manager";
 import { store } from "./utils/store-instance";
+import { forEachPlugin } from "./plugins/index";
 
 declare global {
   interface Window {
